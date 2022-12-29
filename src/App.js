@@ -12,10 +12,14 @@ function App() {
     const [currentCityIndex, setCurrentCityIndex] = useState(cityNames?.length || 0);
 
     function onSubmit (name) {
+        if (~cityNames.indexOf(name)) {
+            console.error('city name already in the list');
+            return;
+        }
         setCityNames(names => [...names, name]);
         const i = texts.indexOf(name);
         console.log({i});
-        if (i === -1)
+        if (!~i)
             console.error('city name not found in labels')
         setCurrentCityIndex(currentCityIndex+1);
     }

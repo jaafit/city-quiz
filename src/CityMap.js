@@ -8,7 +8,12 @@ const CityMap = ({highlight, paths}) => {
         {paths.map((path, i) =>
             <div
                 key={i}
-                className={classnames('absolute', {'text-indigo-700':i === highlight})}
+                className={classnames(
+                    'absolute',
+                    {'text-green-600':i === highlight},
+                    {'text-indigo-900': i < highlight},
+                    {'text-white': i > highlight}
+                )}
                 >
                 <svg
                     dangerouslySetInnerHTML={{__html:path}}

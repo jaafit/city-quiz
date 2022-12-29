@@ -18,6 +18,7 @@ const usePaths = () => {
 
     const paths = svgString.match(/<path[^/]*\/>/sg)
         .map(path => '<g transform="matrix(1.333 0 0 -1.333 800 1600)">' + path + '</g>')
+        .map(path => path.replace('stroke="#CCCCCC"', 'stroke="#555555"'))
         .filter(path => path.indexOf('stroke-dasharray') === -1);
 
     const texts = _.uniq([...svgString.matchAll(/<text><tspan[^>]*>([^<]*)<\/tspan>/sg)]
