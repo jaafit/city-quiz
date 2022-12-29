@@ -1,29 +1,35 @@
 import './App.css';
-import CityMap from "./CityMap";
 import usePaths from "./paths";
-import {useEffect, useState} from "react";
+import {useState} from "react";
+import useLocalStorageState from "use-local-storage-state";
+import CityEntry from "./CityEntry";
+import CityMap from "./CityMap";
 
 function App() {
-    const {opening, ids, paths, closing} = usePaths();
+    const {opening, ids, paths, texts, closing} = usePaths();
+    //const [city, setCity] = useState('');
+    const [cityNames, setCityNames] = useLocalStorageState('citynames', {defaultValue:[]});
+    const [currentCityIndex, setCurrentCityIndex] = useState(cityNames?.length || 0);
 
-    const [city, setCity] = useState('');
-
-    useEffect(() => {
-        if (ids && !city) {
-            const i = Math.floor(Math.random() * (ids.length-1)) + 1;
-            console.log('ids are here', i);
-            setCity(ids[i]);
-        }
-    },[ids, setCity])
-
+    function onSubmit (name) {
+        setCityNames(names => [...names, name]);
+        const i = texts.indexOf(name);
+        console.log({i});
+        if (i === -1)
+            console.error('city name not found in labels')
+        setCurrentCityIndex(currentCityIndex+1);
+    }
 
     return (
     <div className="App">
-      <header className="App-header">
-       City Quiz
-      </header>
-            <CityMap highlight={city} opening={opening} ids={ids} paths={paths} closing={closing} />
-        <p>{city}</p>
+        <header className="App-header">
+            City Quiz
+        </header>
+
+        <CityEntry onSubmit={onSubmit} />
+
+        <CityMap highlight={currentCityIndex} opening={opening} ids={ids} paths={paths} closing={closing} />
+
     </div>
   );
 }

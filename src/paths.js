@@ -1,5 +1,6 @@
 import {useState} from "react";
-import mapSvg from "./map.svg";
+import mapSvg from "./img/themap.svg";
+import _ from "lodash";
 
 const usePaths = () => {
     const [fetching, setFetching] = useState(false);
@@ -10,20 +11,19 @@ const usePaths = () => {
         setFetching(true);
     }
 
-    console.log({svgString});
     if (!svgString) return [];
 
     const opening = svgString.match(/<svg[^>]*>/)[0];
-    console.log({opening});
     const closing = '</svg>';
 
-    const paths = svgString.match(/<path[^/]*\/>/sg);
-    console.log({paths});
+    const paths = svgString.match(/<path[^/]*\/>/sg)
+        .map(path => '<g transform="matrix(1.333 0 0 -1.333 800 1600)">' + path + '</g>')
+        .filter(path => path.indexOf('stroke-dasharray') === -1);
 
-    const ids = paths.map(path => path.match(/id="([^"]*)"/)[1]);
-    console.log({ids});
+    const texts = _.uniq([...svgString.matchAll(/<text><tspan[^>]*>([^<]*)<\/tspan>/sg)]
+        .map(res => res[1]));
 
-    return {svgString, opening, ids, paths, closing};
+    return {svgString, opening, paths, texts, closing};
 
 }
 
