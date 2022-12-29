@@ -1,27 +1,38 @@
 import './App.css';
-import usePaths from "./paths";
-import {useState} from "react";
-import useLocalStorageState from "use-local-storage-state";
-import CityEntry from "./CityEntry";
+import {useCallback, useState} from "react";
+import divisions from './divisions.json'
 import CityMap from "./CityMap";
+import Keyboard from "./Keyboard";
+import useLocalStorageState from "use-local-storage-state";
+import _ from "lodash";
 
 function App() {
-    const {opening, ids, paths, texts, closing} = usePaths();
-    //const [city, setCity] = useState('');
-    const [cityNames, setCityNames] = useLocalStorageState('citynames', {defaultValue:[]});
-    const [currentCityIndex, setCurrentCityIndex] = useState(cityNames?.length || 0);
+    const [currentCityIndex, setCurrentCityIndex] = useLocalStorageState('current-division', {defaultValue:0});
+    const [rightOrWrong, setRightOrWrong] = useState(false);
+    const [, setRightAnswers] = useLocalStorageState('right-answers', {defaultValue:[]});
+    const [, setWrongAnswers] = useLocalStorageState('wrong-answers', {defaultValue:[]});
 
-    function onSubmit (name) {
-        if (~cityNames.indexOf(name)) {
-            console.error('city name already in the list');
-            return;
-        }
-        setCityNames(names => [...names, name]);
-        const i = texts.indexOf(name);
-        console.log({i});
-        if (!~i)
-            console.error('city name not found in labels')
-        setCurrentCityIndex(currentCityIndex+1);
+    function onCorrectAnswer() {
+        setRightOrWrong('Right');
+        setRightAnswers(oldRight => _.uniq([...oldRight, currentCityIndex]))
+        setWrongAnswers(oldWrong => oldWrong.filter(a => a !== currentCityIndex));
+    }
+
+    function onWrongAnswer() {
+        setRightOrWrong('Wrong');
+        setWrongAnswers(oldWrong => _.uniq([...oldWrong, currentCityIndex]));
+        setRightAnswers(oldRight => oldRight.filter(a => a !== currentCityIndex));
+    }
+
+    const nextCity = useCallback(() => {
+            setCurrentCityIndex((currentCityIndex+1)%divisions.length);
+            setRightOrWrong(false);
+    }, [setCurrentCityIndex, currentCityIndex, setRightOrWrong]);
+
+
+    function prevCity() {
+        setCurrentCityIndex(old => (old + divisions.length-1)%divisions.length);
+        setRightOrWrong(false);
     }
 
     return (
@@ -30,9 +41,32 @@ function App() {
             City Quiz
         </header>
 
-        <CityEntry onSubmit={onSubmit} />
+        <div className="flex flex-row">
+            <CityMap
+                width="40vh"
+                height="80vh"
+                highlight={currentCityIndex}
+            />
 
-        <CityMap highlight={currentCityIndex} opening={opening} ids={ids} paths={paths} closing={closing} />
+            <div className="flex flex-col">
+                <Keyboard
+                    currentCityIndex={currentCityIndex}
+                    onCorrectAnswer={onCorrectAnswer}
+                    onWrongAnswer={onWrongAnswer}
+                    onNext={nextCity}
+                    onPrev={prevCity}/>
+
+                {rightOrWrong && <div>
+                    <p>{rightOrWrong + ': ' + divisions[currentCityIndex]}</p>
+                    <button className="text-xl" onClick={nextCity} >Next</button>
+
+                </div>}
+            </div>
+
+        </div>
+
+
+
 
     </div>
   );
