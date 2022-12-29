@@ -7,6 +7,7 @@ const Keyboard = ({width, height, currentCityIndex, onCorrectAnswer, onWrongAnsw
     const [answer, setAnswer] = useState('');
     const [possibleCharacters, setPossibleCharacters] = useState([]);
     const [hideKeys, setHideKeys] = useState(false);
+
     const allAnswers = divisions.map(name => name.replace(' ', ''));
 
     // update answer
@@ -24,37 +25,35 @@ const Keyboard = ({width, height, currentCityIndex, onCorrectAnswer, onWrongAnsw
                 .filter(name => name.startsWith(entered))
                 .map(name => name[entered.length])).sort();
         setPossibleCharacters(pc);
-    }, [entered, allAnswers]);
+    }, [entered, setPossibleCharacters]);
 
     useEffect(() => {
         const onKey = e => {
             if (~possibleCharacters.indexOf(e.key.toUpperCase()))
-                onClickLetterFn(e.key.toUpperCase())();
+                onAddLetterFn(e.key.toUpperCase())();
             else if (~possibleCharacters.indexOf(e.key.toLowerCase()))
-                onClickLetterFn(e.key.toLowerCase())();
+                onAddLetterFn(e.key.toLowerCase())();
 
             if (e.key === 'ArrowRight' || e.key === 'Enter') onNext()
             if (e.key === 'ArrowLeft') onPrev()
         }
         document.addEventListener('keydown', onKey, false);
         return () => document.removeEventListener('keydown', onKey)
-    }, [possibleCharacters, onNext, onPrev]);
+    }, [possibleCharacters, onNext, onPrev, answer, entered]);
 
-    // see if we're right
-    useEffect(() => {
-        if (allAnswers.filter(d => d.startsWith(entered)).length === 1) {
-            onCorrectAnswer();
-            setHideKeys(true);
-        }
-        else if (!answer.startsWith(entered)) {
-            onWrongAnswer();
-            setHideKeys(true);
-        }
-    }, [answer, entered, allAnswers, onCorrectAnswer, onWrongAnswer]);
-
-    function onClickLetterFn(letter) {
+    function onAddLetterFn(letter) {
         return () => {
             setEntered(old => old+letter);
+
+            const  _entered = entered + letter;
+
+            if (!answer.startsWith(_entered)) {
+                onWrongAnswer();
+                setHideKeys(true);
+            } else if (allAnswers.filter(d => d.startsWith(_entered)).length === 1) {
+                onCorrectAnswer();
+                setHideKeys(true);
+            }
         }
     }
 
@@ -67,7 +66,7 @@ const Keyboard = ({width, height, currentCityIndex, onCorrectAnswer, onWrongAnsw
                 {possibleCharacters.map((letter,i) =>
                     <button className="border-gray-300 bg-blue-200 rounded p-4 m-2 text-xl text-color-blue"
                             key={i}
-                            onClick={onClickLetterFn(letter)}>
+                            onClick={onAddLetterFn(letter)}>
                         {letter}
                     </button>)}
 

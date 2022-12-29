@@ -24,7 +24,7 @@ const CityMap = ({highlight, width, height}) => {
                     dangerouslySetInnerHTML={{__html:path}}
                     width="40vh"
                     height="80vh"
-                    viewBox="0 1100 1400 1800"
+                    viewBox="100 1100 1500 1800"
                 />
             </div>)}
 
