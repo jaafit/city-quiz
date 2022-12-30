@@ -27,6 +27,7 @@ const Keyboard = ({width, height, currentCityIndex, onCorrectAnswer, onWrongAnsw
         setPossibleCharacters(pc);
     }, [entered, setPossibleCharacters]);
 
+    // listen to keydown
     useEffect(() => {
         const onKey = e => {
             if (~possibleCharacters.indexOf(e.key.toUpperCase()))
@@ -41,6 +42,7 @@ const Keyboard = ({width, height, currentCityIndex, onCorrectAnswer, onWrongAnsw
         return () => document.removeEventListener('keydown', onKey)
     }, [possibleCharacters, onNext, onPrev, answer, entered]);
 
+    // user added a letter to their guess
     function onAddLetterFn(letter) {
         return () => {
             setEntered(old => old+letter);
@@ -50,7 +52,7 @@ const Keyboard = ({width, height, currentCityIndex, onCorrectAnswer, onWrongAnsw
             if (!answer.startsWith(_entered)) {
                 onWrongAnswer();
                 setHideKeys(true);
-            } else if (allAnswers.filter(d => d.startsWith(_entered)).length === 1) {
+            } else if (_entered === answer || allAnswers.filter(d => d.startsWith(_entered)).length === 1) {
                 onCorrectAnswer();
                 setHideKeys(true);
             }
