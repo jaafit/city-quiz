@@ -13,8 +13,7 @@ const Keyboard = ({width, height, currentCityIndex, onCorrectAnswer, onWrongAnsw
     // update answer
     useEffect(() => {
         setEntered('');
-        const a = divisions[currentCityIndex].replace(' ','');
-        setAnswer(a);
+        setAnswer(divisions[currentCityIndex].replace(' ',''));
         setHideKeys(false);
     }, [currentCityIndex, setEntered]);
 
@@ -23,7 +22,8 @@ const Keyboard = ({width, height, currentCityIndex, onCorrectAnswer, onWrongAnsw
         const pc = _.uniq(
             allAnswers
                 .filter(name => name.startsWith(entered))
-                .map(name => name[entered.length])).sort();
+                .filter(name => name.length > entered.length)
+                .map(name => name[entered.length] === ' ' ? name[entered.length+1] : name[entered.length])).sort();
         setPossibleCharacters(pc);
     }, [entered, setPossibleCharacters]);
 
