@@ -36,19 +36,20 @@ function App() {
     }
 
     return (
-    <div className="App">
-        <header className="App-header">
-            City Quiz
-        </header>
-
+    <div>
         <div className="flex flex-row">
             <CityMap
-                width="40vh"
-                height="80vh"
+                width="50vh"
+                height="100vh"
                 highlight={currentCityIndex}
+                showNames={true}
             />
 
-            <div className="flex flex-col">
+            <div className="flex flex-col w-full">
+                <header className="App-header">
+                    City Quiz
+                </header>
+
                 <Keyboard
                     currentCityIndex={currentCityIndex}
                     onCorrectAnswer={onCorrectAnswer}
@@ -64,8 +65,6 @@ function App() {
             </div>
 
         </div>
-
-
 
 
     </div>
