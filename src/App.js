@@ -1,39 +1,54 @@
 import './App.css';
-import {useCallback, useState} from "react";
+import {useState} from "react";
 import divisions from './divisions.json'
 import CityMap from "./CityMap";
 import Keyboard from "./Keyboard";
 import useLocalStorageState from "use-local-storage-state";
-import _ from "lodash";
+
+const startingCities = ['Manchester', 'Nashua', 'Concord', 'Derry', 'Dover', 'Rochester', 'Salem', 'Merrimack',
+    'Londonderry', 'Hudson', 'Bedford', 'Keene', 'Portsmouth', 'Goffstown', 'Laconia', 'Hampton', 'Milford', 'Exeter', 'Windham', 'Durham',
+    'Hooksett', 'Lebanon', 'Pelham', 'Claremont', 'Somersworth', 'Amherst', 'Hanover', 'Raymond', 'Conway', 'Berlin', 'Newmarket', 'Barrington',
+    'Weare', 'Hampstead', 'Franklin', 'Litchfield', 'Seabrook', 'Hollis', 'Bow', 'Plaistow'
+];
+const startingQueue = startingCities.concat(divisions.filter(d => !~startingCities.indexOf(d)));
 
 function App() {
-    const [currentCityIndex, setCurrentCityIndex] = useLocalStorageState('current-division', {defaultValue:0});
+
+    const [cityQueue, setCityQueue] = useLocalStorageState('city-queue', {defaultValue:startingQueue});
     const [rightOrWrong, setRightOrWrong] = useState(false);
-    const [, setRightAnswers] = useLocalStorageState('right-answers', {defaultValue:[]});
-    const [, setWrongAnswers] = useLocalStorageState('wrong-answers', {defaultValue:[]});
+    const [history, setHistory] = useLocalStorageState('history', {defaultValue:{}});
+
+    const city = cityQueue[0];
+    const corrects = history[city]?.filter(a => !!a).length || 0;
+
+    function recordAnswer(a) {
+        setHistory(oldAnswers => ({
+            ...oldAnswers,
+            [city]: [...(oldAnswers[city]?.slice(-10, 9) || []), a]
+        }));
+    }
 
     function onCorrectAnswer() {
         setRightOrWrong('Right');
-        setRightAnswers(oldRight => _.uniq([...oldRight, currentCityIndex]))
-        setWrongAnswers(oldWrong => oldWrong.filter(a => a !== currentCityIndex));
+        recordAnswer(1);
     }
 
     function onWrongAnswer() {
         setRightOrWrong('Wrong');
-        setWrongAnswers(oldWrong => _.uniq([...oldWrong, currentCityIndex]));
-        setRightAnswers(oldRight => oldRight.filter(a => a !== currentCityIndex));
+        recordAnswer(0);
     }
 
-    const nextCity = useCallback(() => {
-            setCurrentCityIndex((currentCityIndex+1)%divisions.length);
-            setRightOrWrong(false);
-    }, [setCurrentCityIndex, currentCityIndex, setRightOrWrong]);
-
-
-    function prevCity() {
-        setCurrentCityIndex(old => (old + divisions.length-1)%divisions.length);
+    function nextCity () {
         setRightOrWrong(false);
+
+        setCityQueue(oldQueue => {
+            oldQueue.shift();
+            if (corrects === 10) oldQueue.push(city);
+            else oldQueue.splice(10+corrects * 10, 0, city);
+            return oldQueue;
+        });
     }
+
 
     return (
     <div>
@@ -41,8 +56,9 @@ function App() {
             <CityMap
                 width="50vh"
                 height="100vh"
-                highlight={currentCityIndex}
-                showNames={true}
+                highlightCity={city}
+                showThisCity={corrects === 0}
+                showOtherCities={corrects < 5}
             />
 
             <div className="flex flex-col w-full">
@@ -51,14 +67,14 @@ function App() {
                 </header>
 
                 <Keyboard
-                    currentCityIndex={currentCityIndex}
+                    currentCity={city}
                     onCorrectAnswer={onCorrectAnswer}
                     onWrongAnswer={onWrongAnswer}
                     onNext={nextCity}
-                    onPrev={prevCity}/>
+                    />
 
                 {rightOrWrong && <div>
-                    <p>{rightOrWrong + ': ' + divisions[currentCityIndex]}</p>
+                    <p>{rightOrWrong + ': ' + city}</p>
                     <button className="text-xl" onClick={nextCity} >Next</button>
 
                 </div>}

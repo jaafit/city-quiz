@@ -2,7 +2,7 @@ import divisions from './divisions.json'
 import {useEffect, useState} from "react";
 import _ from "lodash";
 
-const Keyboard = ({width, height, currentCityIndex, onCorrectAnswer, onWrongAnswer, onNext, onPrev}) => {
+const Keyboard = ({width, height, currentCity, onCorrectAnswer, onWrongAnswer, onNext, onPrev}) => {
     const [entered, setEntered] = useState('');
     const [answer, setAnswer] = useState('');
     const [possibleCharacters, setPossibleCharacters] = useState([]);
@@ -13,9 +13,9 @@ const Keyboard = ({width, height, currentCityIndex, onCorrectAnswer, onWrongAnsw
     // update answer
     useEffect(() => {
         setEntered('');
-        setAnswer(divisions[currentCityIndex].replace(' ',''));
+        setAnswer(currentCity.replace(' ',''));
         setHideKeys(false);
-    }, [currentCityIndex, setEntered]);
+    }, [currentCity, setEntered]);
 
     // update possible characters
     useEffect( () => {
@@ -30,17 +30,21 @@ const Keyboard = ({width, height, currentCityIndex, onCorrectAnswer, onWrongAnsw
     // listen to keydown
     useEffect(() => {
         const onKey = e => {
-            if (~possibleCharacters.indexOf(e.key.toUpperCase()))
-                onAddLetterFn(e.key.toUpperCase())();
-            else if (~possibleCharacters.indexOf(e.key.toLowerCase()))
-                onAddLetterFn(e.key.toLowerCase())();
+            if (!hideKeys) {
+                if (~possibleCharacters.indexOf(e.key.toUpperCase()))
+                    onAddLetterFn(e.key.toUpperCase())();
+                else if (~possibleCharacters.indexOf(e.key.toLowerCase()))
+                    onAddLetterFn(e.key.toLowerCase())();
+            }
 
-            if (e.key === 'ArrowRight' || e.key === 'Enter') onNext()
-            if (e.key === 'ArrowLeft') onPrev()
+            if ( e.key === 'Enter') {
+                setEntered('');
+                onNext()
+            }
         }
         document.addEventListener('keydown', onKey, false);
         return () => document.removeEventListener('keydown', onKey)
-    }, [possibleCharacters, onNext, onPrev, answer, entered]);
+    }, [hideKeys, possibleCharacters, onNext, onPrev, answer, entered]);
 
     // user added a letter to their guess
     function onAddLetterFn(letter) {
