@@ -2,6 +2,7 @@ import classnames from "classnames";
 import divisions from './divisions.json'
 import useSvg from "./parse-svg";
 import useLocalStorageState from "use-local-storage-state";
+import zooms from './zooms.json';
 
 const SvgContainer = ({className, html, zoom}) => {
 
@@ -27,14 +28,15 @@ const SvgContainer = ({className, html, zoom}) => {
     </div>
 };
 
-const rightColors = ['text-green-50', 'text-green-100', 'text-green-200', 'text-green-300', 'text-green-400', 'text-green-500',
-    'text-green-600', 'text-green-700', 'text-green-800', 'text-green-900'];
-const wrongColors = ['text-red-50', 'text-red-100', 'text-red-200', 'text-red-300', 'text-red-400', 'text-red-500',
-    'text-red-600', 'text-red-700', 'text-red-800', 'text-red-900'];
+const rightColors = ['text-green-100', 'text-green-200', 'text-green-300', 'text-green-400', 'text-green-500',
+    'text-green-600', 'text-green-700'];
+const wrongColors = ['text-red-100', 'text-red-200', 'text-red-300', 'text-red-400', 'text-red-500',
+    'text-red-600', 'text-red-700'];
 
 const CityMap = ({highlightCity, showThisCity, showOtherCities, width, height, zoom}) => {
     const { paths, texts } = useSvg();
     const [answerHistory, ] = useLocalStorageState('history', {defaultValue:{}});
+    if (zoom === undefined) zoom = zooms[highlightCity] || 0;
 
     const highlightIndex = divisions.indexOf(highlightCity);
 

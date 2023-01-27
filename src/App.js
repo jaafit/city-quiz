@@ -1,10 +1,9 @@
 import './App.css';
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import divisions from './divisions.json'
 import CityMap from "./CityMap";
 import Keyboard from "./Keyboard";
 import useLocalStorageState from "use-local-storage-state";
-import Zoomer from "./Zoomer";
 
 const startingCities = ['Manchester', 'Nashua', 'Concord', 'Derry', 'Dover', 'Rochester', 'Salem', 'Merrimack',
     'Londonderry', 'Hudson', 'Bedford', 'Keene', 'Portsmouth', 'Goffstown', 'Laconia', 'Hampton', 'Milford', 'Exeter', 'Windham', 'Durham',
@@ -14,24 +13,23 @@ const startingCities = ['Manchester', 'Nashua', 'Concord', 'Derry', 'Dover', 'Ro
 const startingQueue = startingCities.concat(divisions.filter(d => !~startingCities.indexOf(d)));
 
 function App() {
-    const [zooms] = useLocalStorageState('zooms', {defaultValue:{}});
-    const [zoom, setZoom] = useState(0);
     const [cityQueue, setCityQueue] = useLocalStorageState('city-queue', {defaultValue:startingQueue});
     const [rightOrWrong, setRightOrWrong] = useState(false);
     const [history, setHistory] = useLocalStorageState('history', {defaultValue:{}});
 
-    useEffect(() => {
-        if (zooms[cityQueue[0]])
-            setZoom(zooms[cityQueue[0]]);
-    }, [cityQueue]);
-
     const city = cityQueue[0];
+    let streak = 0;
+    history[city]?.forEach(a => a ? streak++ : streak = 0);
     const corrects = history[city]?.filter(a => !!a).length || 0;
+
+    const progress = Object.keys(history)
+        .reduce((prev, key) => prev + history[key].filter(a=>a).length, 0)
+        / (divisions.length * 7);
 
     function recordAnswer(a) {
         setHistory(oldAnswers => ({
             ...oldAnswers,
-            [city]: [...(oldAnswers[city]?.slice(-10, 9) || []), a]
+            [city]: [...(oldAnswers[city]?.slice(-6, 7) || []), a]
         }));
     }
 
@@ -50,20 +48,11 @@ function App() {
 
         setCityQueue(oldQueue => {
             oldQueue.shift();
-            if (corrects === 10) oldQueue.push(city);
-            else oldQueue.splice(10+corrects * 10, 0, city);
+            if (streak === 7) oldQueue.push(city);
+            else oldQueue.splice([4,8,16,32,64,128,256][streak], 0, city);
             return oldQueue;
         });
     }
-
-    function nextCityForZoom() {
-        setCityQueue(oldQ => {
-            oldQ.push(oldQ.shift());
-            return oldQ;
-        });
-
-    }
-
 
     return (
     <div>
@@ -73,22 +62,38 @@ function App() {
                 height="100vh"
                 highlightCity={city}
                 showThisCity={corrects === 0}
-                showOtherCities={corrects < 5}
-                zoom={zoom}
+                showOtherCities={corrects <= 5}
+                zoom={corrects > 5 ? 0 : undefined}
             />
 
-            <div className="flex flex-col w-full">
-                <header className="App-header">
-                    City Quiz
-                </header>
+            <div className="flex flex-col w-full justify-between">
+                <div className="flex flex-col w-full">
+                    <header className="App-header">
+                        City Quiz
+                    </header>
 
-               <Zoomer city={city} zoom={zoom} onZoom={z => setZoom(z)} onNext={nextCityForZoom}/>
+                    <Keyboard
+                        currentCity={city}
+                        onCorrectAnswer={onCorrectAnswer}
+                        onWrongAnswer={onWrongAnswer}
+                        onNext={nextCity}
+                    />
 
-                {rightOrWrong && <div>
-                    <p>{rightOrWrong + ': ' + city}</p>
-                    <button className="text-xl" onClick={nextCity} >Next</button>
+                    {rightOrWrong && <div className="p-8">
+                        <p>{rightOrWrong + ': ' + city}</p>
+                        <button className="text-xl" onClick={nextCity} >Next</button>
 
-                </div>}
+                    </div>}
+
+
+                </div>
+
+                <div className="m-4 bg-black rounded-lg p-3" >
+                    <div className="bg-blue-500 rounded h-3" style={{width:`${progress*100}%`}}>
+
+                    </div>
+                </div>
+
             </div>
 
         </div>
