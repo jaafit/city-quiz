@@ -3,13 +3,26 @@ import divisions from './divisions.json'
 import useSvg from "./parse-svg";
 import useLocalStorageState from "use-local-storage-state";
 
-const SvgContainer = ({className, html}) => {
+const SvgContainer = ({className, html, zoom}) => {
+
+    const viewBox =
+        zoom === 1 ? "100 1900 700 1400" :
+        zoom === 2 ? "450 1900 700 1400" :
+        zoom === 3 ? "800 1900 700 1400" :
+        zoom === 4 ? "100 1200 700 1400" :
+        zoom === 5 ? "450 1200 700 1400" :
+        zoom === 6 ? "800 1200 700 1400" :
+        zoom === 7 ? "100 500 700 1400" :
+        zoom === 8 ? "450 500 700 1400" :
+        zoom === 9 ? "800 500 700 1400" :
+        "100 500 1400 2800";
+
     return <div className={classnames('absolute w-full h-full', className)}>
         <svg
             dangerouslySetInnerHTML={{__html:html}}
             width="100%"
             height="100%"
-            viewBox="100 1000 1400 1700"
+            viewBox={viewBox}
         />
     </div>
 };
@@ -19,13 +32,11 @@ const rightColors = ['text-green-50', 'text-green-100', 'text-green-200', 'text-
 const wrongColors = ['text-red-50', 'text-red-100', 'text-red-200', 'text-red-300', 'text-red-400', 'text-red-500',
     'text-red-600', 'text-red-700', 'text-red-800', 'text-red-900'];
 
-const CityMap = ({highlightCity, showThisCity, showOtherCities, width, height}) => {
+const CityMap = ({highlightCity, showThisCity, showOtherCities, width, height, zoom}) => {
     const { paths, texts } = useSvg();
     const [answerHistory, ] = useLocalStorageState('history', {defaultValue:{}});
 
     const highlightIndex = divisions.indexOf(highlightCity);
-    console.log({highlightIndex});
-    console.log({highlightCity});
 
     if (!paths || !texts) return null; // svg hasn't loaded yet
 
@@ -42,14 +53,14 @@ const CityMap = ({highlightCity, showThisCity, showOtherCities, width, height}) 
             const numberWrong = answered && answerHistory[cityName].filter(a => !a).length;
 
             const progressColor = recentlyCorrect ? rightColors[numberCorrect-1] : wrongColors[numberWrong-1];
-            return <SvgContainer html={path} key={i} className={
+            return <SvgContainer html={path} key={i} zoom={zoom} className={
                     (i === highlightIndex) ? 'text-blue-500' :
                     !answered ? 'text-white' :
                     progressColor}/>
         }
         )}
 
-        {shownTexts.map((text,i) => <SvgContainer html={text.svg} key={i}/>)}
+        {shownTexts.map((text,i) => <SvgContainer html={text.svg} zoom={zoom} key={i}/>)}
 
     </div>
 }

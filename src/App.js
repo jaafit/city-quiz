@@ -1,9 +1,10 @@
 import './App.css';
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import divisions from './divisions.json'
 import CityMap from "./CityMap";
 import Keyboard from "./Keyboard";
 import useLocalStorageState from "use-local-storage-state";
+import Zoomer from "./Zoomer";
 
 const startingCities = ['Manchester', 'Nashua', 'Concord', 'Derry', 'Dover', 'Rochester', 'Salem', 'Merrimack',
     'Londonderry', 'Hudson', 'Bedford', 'Keene', 'Portsmouth', 'Goffstown', 'Laconia', 'Hampton', 'Milford', 'Exeter', 'Windham', 'Durham',
@@ -13,10 +14,16 @@ const startingCities = ['Manchester', 'Nashua', 'Concord', 'Derry', 'Dover', 'Ro
 const startingQueue = startingCities.concat(divisions.filter(d => !~startingCities.indexOf(d)));
 
 function App() {
-
+    const [zooms] = useLocalStorageState('zooms', {defaultValue:{}});
+    const [zoom, setZoom] = useState(0);
     const [cityQueue, setCityQueue] = useLocalStorageState('city-queue', {defaultValue:startingQueue});
     const [rightOrWrong, setRightOrWrong] = useState(false);
     const [history, setHistory] = useLocalStorageState('history', {defaultValue:{}});
+
+    useEffect(() => {
+        if (zooms[cityQueue[0]])
+            setZoom(zooms[cityQueue[0]]);
+    }, [cityQueue]);
 
     const city = cityQueue[0];
     const corrects = history[city]?.filter(a => !!a).length || 0;
@@ -49,6 +56,14 @@ function App() {
         });
     }
 
+    function nextCityForZoom() {
+        setCityQueue(oldQ => {
+            oldQ.push(oldQ.shift());
+            return oldQ;
+        });
+
+    }
+
 
     return (
     <div>
@@ -59,6 +74,7 @@ function App() {
                 highlightCity={city}
                 showThisCity={corrects === 0}
                 showOtherCities={corrects < 5}
+                zoom={zoom}
             />
 
             <div className="flex flex-col w-full">
@@ -66,12 +82,7 @@ function App() {
                     City Quiz
                 </header>
 
-                <Keyboard
-                    currentCity={city}
-                    onCorrectAnswer={onCorrectAnswer}
-                    onWrongAnswer={onWrongAnswer}
-                    onNext={nextCity}
-                    />
+               <Zoomer city={city} zoom={zoom} onZoom={z => setZoom(z)} onNext={nextCityForZoom}/>
 
                 {rightOrWrong && <div>
                     <p>{rightOrWrong + ': ' + city}</p>
