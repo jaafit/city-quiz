@@ -4,13 +4,21 @@ import divisions from './divisions.json'
 import CityMap from "./CityMap";
 import Keyboard from "./Keyboard";
 import useLocalStorageState from "use-local-storage-state";
+import _ from "lodash";
 
 const startingCities = ['Manchester', 'Nashua', 'Concord', 'Derry', 'Dover', 'Rochester', 'Salem', 'Merrimack',
     'Londonderry', 'Hudson', 'Bedford', 'Keene', 'Portsmouth', 'Goffstown', 'Laconia', 'Hampton', 'Milford', 'Exeter', 'Windham', 'Durham',
     'Hooksett', 'Lebanon', 'Pelham', 'Claremont', 'Somersworth', 'Amherst', 'Hanover', 'Raymond', 'Conway', 'Berlin', 'Newmarket', 'Barrington',
     'Weare', 'Hampstead', 'Franklin', 'Litchfield', 'Seabrook', 'Hollis', 'Bow', 'Plaistow'
 ];
-const startingQueue = startingCities.concat(divisions.filter(d => !~startingCities.indexOf(d)));
+
+const endingCities = ["Hale's Location", "Hadley's Purchase", "Thompson and Meserve's Purchase", "Bean's Purchase","Low and Burbank's Grant",
+    "Hart's Location","Cutt's Grant","Bean's Grant","Sargent's Purchase","Martin's Location","Pinkham's Grant","Crawford's Purchase",
+    "Chandler's Purchase","Green's Grant","Second College Grant","Atkinson and Gilmanton Grant","Erving's Location","Wentworth's Location","Dix's Grant"];
+
+const startingQueue = startingCities.concat(_.shuffle(divisions)
+    .filter(d => !~startingCities.indexOf(d) && !~endingCities.indexOf(d)))
+    .concat(endingCities);
 
 function App() {
     const [cityQueue, setCityQueue] = useLocalStorageState('city-queue', {defaultValue:startingQueue});
