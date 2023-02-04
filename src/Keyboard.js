@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import _ from "lodash";
 
-const Keyboard = ({cities, width, height, currentCity, onCorrectAnswer, onWrongAnswer, onNext, onPrev, onToggleZoom}) => {
+const Keyboard = ({cities, width, height, currentCity, onCorrectAnswer, onWrongAnswer, onNext, onPrev, onToggleZoom, md}) => {
     const [entered, setEntered] = useState('');
     const [answer, setAnswer] = useState('');
     const [possibleCharacters, setPossibleCharacters] = useState([]);
@@ -67,7 +67,7 @@ const Keyboard = ({cities, width, height, currentCity, onCorrectAnswer, onWrongA
     }
 
     return(
-        <div style={{width,height}} className="ml-20">
+        <div style={{width,height}} className={md ? "ml-20":'ml-4'}>
             <div>
                 <p className="text-2xl my-4 text-color-black">{entered || '______________'}</p>
             </div>
@@ -80,7 +80,6 @@ const Keyboard = ({cities, width, height, currentCity, onCorrectAnswer, onWrongA
                     </button>)}
 
             </div>}
-            <button className="rounded p-4 mt-10 text-xl bg-green-600" onClick={onToggleZoom}>+</button>
 
             <button className="mt-5 mr-20 p-3 border-2 rounded text-xl" onClick={onNext} >Next</button>
 

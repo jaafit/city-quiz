@@ -1,10 +1,10 @@
 
 ## TODO
 
-* mobile layout
+* static key positions
 * explain round 1 
 * export/import
-* Shorten some names on the map when they aren't highlighted
+* improve design
 
 ## Available Scripts
 

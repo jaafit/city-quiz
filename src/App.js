@@ -5,6 +5,7 @@ import CityMap from "./CityMap";
 import Keyboard from "./Keyboard";
 import useLocalStorageState from "use-local-storage-state";
 import _ from "lodash";
+import classnames from "classnames";
 
 const startingCities = ['Manchester', 'Nashua', 'Concord', 'Derry', 'Dover', 'Rochester', 'Salem', 'Merrimack',
     'Londonderry', 'Hudson', 'Bedford', 'Keene', 'Portsmouth', 'Goffstown', 'Laconia', 'Hampton', 'Milford', 'Exeter', 'Windham', 'Durham',
@@ -24,6 +25,15 @@ function App() {
     const [rightOrWrong, setRightOrWrong] = useState(false);
     const [history, setHistory] = useLocalStorageState('history', {defaultValue:{}});
     const [zoom, setZoom] = useState(true);
+    const [md, setMd] = useState(
+        window.matchMedia("(min-width: 768px)").matches
+    );
+
+    useEffect(() => {
+        window
+            .matchMedia("(min-width: 768px)")
+            .addEventListener('change', e => setMd( e.matches ));
+    }, []);
 
     const city = cityQueue[0];
     let streak = 0;
@@ -61,32 +71,37 @@ function App() {
         setCityQueue(oldQueue => {
             oldQueue.shift();
             if (streak >= 6) oldQueue.push(city);
-            else oldQueue.splice([4,8,16,32,64,128][streak], 0, city);
+            else if (history[city].length === 1) oldQueue.splice(3, 0, city);
+            else oldQueue.splice([3,7,15,31,63,127][streak], 0, city);
             return oldQueue;
         });
     }
 
     return (
     <div>
-        <div className="flex flex-row">
+        <div className={classnames("flex", {"flex-row": md, "flex-col": !md})}>
             <CityMap
                 width="50vh"
-                height="100vh"
+                height={md ? "100vh" : '50vh'}
                 city={city}
                 highlightCity={!rightOrWrong}
                 showThisCity={corrects === 0 || !!rightOrWrong}
                 showOtherCities={true}
                 excludedCities={excludedCities}
                 zoom={zoom}
+                onToggleZoom={() => setZoom(!zoom)}
             />
 
             <div className="flex flex-col w-full justify-between">
                 <div className="flex flex-col w-full">
-                    <header className="App-header">
-                        City Quiz
-                    </header>
+                    {md && (
+                        <header className="App-header">
+                            City Quiz
+                        </header>
+                    )}
 
                     <Keyboard
+                        md={md}
                         cities={cityQueue}
                         currentCity={city}
                         onCorrectAnswer={onCorrectAnswer}

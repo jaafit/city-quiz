@@ -20,7 +20,7 @@ const rightColors = ['text-green-100', 'text-green-200', 'text-green-300', 'text
 const wrongColors = ['text-red-100', 'text-red-200', 'text-red-300', 'text-red-400', 'text-red-500',
     'text-red-600', 'text-red-700', 'text-red-800'];
 
-const CityMap = ({city, highlightCity, showThisCity, showOtherCities, excludedCities, width, height, zoom}) => {
+const CityMap = ({city, highlightCity, showThisCity, showOtherCities, excludedCities, width, height, zoom, onToggleZoom}) => {
     const { paths, centers, texts } = useSvg();
     const [answerHistory, ] = useLocalStorageState('history', {defaultValue:{}});
 
@@ -34,7 +34,7 @@ const CityMap = ({city, highlightCity, showThisCity, showOtherCities, excludedCi
     const zw = 400;
     const viewBox =
         zoom ? [center.x-zw/2, center.y-zw/2, zw, zw].join(' ') :
-            "100 1200 1400 1400";
+            "100 600 1400 2600";
     console.log({ highlightIndex, viewBox});
 
     const shownTexts = showThisCity ? includedTexts :
@@ -62,6 +62,8 @@ const CityMap = ({city, highlightCity, showThisCity, showOtherCities, excludedCi
 
         {shownTexts
             .map((text,i) => <SvgContainer html={text.svg} viewBox={viewBox} key={i}/>)}
+
+        <button className="absolute right-2 bottom-2 rounded p-4 mt-10 text-xl bg-blue-200" onClick={onToggleZoom}>+</button>
 
     </div>
 }
