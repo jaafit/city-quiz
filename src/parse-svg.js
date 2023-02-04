@@ -1,5 +1,4 @@
 import {useEffect, useState} from "react";
-import mapSvg from "./img/themap.svg";
 import _ from "lodash";
 
 const useSvg = () => {
@@ -7,7 +6,7 @@ const useSvg = () => {
     const [data, setData] = useState({});
 
     useEffect(() => {
-        fetch(mapSvg).then(r => r.text()).then(text => {setSvgString(text)});
+        fetch('/themap.svg').then(r => r.text()).then(text => {setSvgString(text)});
     }, []);
 
     useEffect(() => {
