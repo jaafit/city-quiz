@@ -1,5 +1,4 @@
 import {useEffect, useState} from "react";
-import _ from "lodash";
 import divisions from "./divisions.json";
 import themap from './img/themap.svg';
 
@@ -41,7 +40,7 @@ export const useSvg = () => {
             };
         })
 
-        const matches = [...svgString.matchAll(/<g [^\r]*\r\n<text><tspan[^>]*>([^<]*)<\/tspan><\/text>\r\n<\/g>/g)];
+        const matches = [...svgString.matchAll(/<g[^<]*<text><tspan[^>]*>([^<]*)<\/tspan><\/text>[^<]*<\/g>/sg)];
         const objs = matches
             .map(res => ({city:res[1], svg:res[0]}));
         const filtered = objs
