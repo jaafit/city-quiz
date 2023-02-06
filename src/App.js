@@ -10,7 +10,8 @@ import classnames from "classnames";
 const startingCities = ['Manchester', 'Nashua', 'Concord', 'Derry', 'Dover', 'Rochester', 'Salem', 'Merrimack',
     'Londonderry', 'Hudson', 'Bedford', 'Keene', 'Portsmouth', 'Goffstown', 'Laconia', 'Hampton', 'Milford', 'Exeter', 'Windham', 'Durham',
     'Hooksett', 'Lebanon', 'Pelham', 'Claremont', 'Somersworth', 'Amherst', 'Hanover', 'Raymond', 'Conway', 'Berlin', 'Newmarket', 'Barrington',
-    'Weare', 'Hampstead', 'Franklin', 'Litchfield', 'Seabrook', 'Hollis', 'Bow', 'Plaistow'
+    'Weare', 'Hampstead', 'Franklin', 'Litchfield', 'Seabrook', 'Hollis', 'Bow', 'Plaistow', 'Stratham', 'Gilford', 'Belmont', 'Pembroke', 'Swanzey',
+    'Atkinson', 'Epping', 'Farmington', 'Plymouth', 'Meredith'
 ];
 
 const excludedCities = ["Hale's Location", "Hadley's Purchase", "Thompson and Meserve's Purchase", "Bean's Purchase","Low and Burbank's Grant",
@@ -25,6 +26,7 @@ function App() {
     const [rightOrWrong, setRightOrWrong] = useState(false);
     const [history, setHistory] = useLocalStorageState('history', {defaultValue:{}});
     const [zoom, setZoom] = useState(true);
+    const [showPercent, setShowPercent] = useState(false);
     const [md, setMd] = useState(
         window.matchMedia("(min-width: 768px)").matches
     );
@@ -66,6 +68,8 @@ function App() {
     }
 
     function nextCity () {
+        if (!rightOrWrong) return;
+
         setRightOrWrong(false);
 
         setCityQueue(oldQueue => {
@@ -77,11 +81,16 @@ function App() {
         });
     }
 
+    function onClickProgressBar() {
+        setShowPercent(true);
+        window.setTimeout(() => setShowPercent(false), 3000);
+    }
+
     return (
     <div>
-        <div className={classnames("flex", {"flex-row": md, "flex-col": !md})}>
+        <div className={classnames("flex h-screen", {"flex-row": md, "flex-col items-center": !md})}>
             <CityMap
-                width="50vh"
+                width={md? "50vw" : "50vh"}
                 height={md ? "100vh" : '50vh'}
                 city={city}
                 highlightCity={!rightOrWrong}
@@ -92,15 +101,17 @@ function App() {
                 onToggleZoom={() => setZoom(!zoom)}
             />
 
-            <div className="flex flex-col w-full justify-between">
-                <div className="flex flex-col w-full">
+            <div className={classnames("flex flex-col justify-between items-center", md ? 'w-1/2 h-full' : 'w-full h-1/2')} >
+                <div className="flex flex-col items-center">
                     {md && (
-                        <header className="App-header">
-                            City Quiz
+                        <header className="bg-blue-200 text-2xl p-6 w-full">
+                            NH City Quiz
                         </header>
+
                     )}
 
                     <Keyboard
+                        tutorial={progress < 0.01}
                         md={md}
                         cities={cityQueue}
                         currentCity={city}
@@ -110,20 +121,26 @@ function App() {
                         onToggleZoom={() => setZoom(!zoom)}
                     />
 
-                    {rightOrWrong && <div className="ml-20 mt-24 flex flex-col">
+                    {rightOrWrong && <div className="ml-10 mt-5 flex flex-col">
                         <p className="text-xl font-bold">{rightOrWrong + ': ' + city}</p>
+                        <button className="mt-4 p-2 w-full border-2 rounded text-xl" onClick={nextCity} >Next</button>
                     </div>}
 
 
                 </div>
 
-                <div className="flex flex-row w-full px-4">
-                    <div className="flex-grow m-4 bg-black rounded-lg p-3" >
-                        <div className="bg-blue-500 rounded h-3" style={{width:`${progress*100}%`}}>
-
+                <div className="w-full flex flex-col items-center">
+                    <div className="flex flex-row w-full px-4" onClick={onClickProgressBar}>
+                        <div className="flex-grow m-3 bg-black rounded-lg p-2" >
+                            <div className="bg-blue-500 rounded h-1" style={{width:`${progress*100}%`}}/>
                         </div>
+                        {showPercent &&
+                            <p className="m-2 text-lg font-bold">{Math.floor(progress*100)}%</p>
+                        }
                     </div>
-                    <p className="m-4 text-3xl font-bold">{Math.floor(progress*100)}%</p>
+
+                    <a href="https://evincer.org" className="m-1 text-bold text-blue-700 cursor-pointer">evincer.org</a>
+
                 </div>
 
             </div>

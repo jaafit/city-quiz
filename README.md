@@ -1,10 +1,12 @@
 
 ## TODO
 
-* static key positions
-* explain round 1 
+* host on evincer
+* white city text when finished
+
+## backlog 
 * export/import
-* improve design
+* checkbox to add non-cities (after 50% complete)
 
 ## Available Scripts
 
