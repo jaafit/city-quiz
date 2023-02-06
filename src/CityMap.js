@@ -47,6 +47,7 @@ const CityMap = ({city, highlightCity, showThisCity, showOtherCities, excludedCi
     const shownTexts = showThisCity ? includedTexts :
             showOtherCities ? includedTexts.filter(text => !city || text.city !== divisions[highlightIndex])
                 : [];
+    console.log({includedTexts, shownTexts});
 
     return <div className='relative' style={{width, height, flexShrink:0}} >
         {paths.map((path, i) =>{
@@ -55,7 +56,7 @@ const CityMap = ({city, highlightCity, showThisCity, showOtherCities, excludedCi
             const cityColor  = getColor(cityName, answerHistory, true);
 
             return <SvgContainer html={path} key={i} viewBox={viewBox} center={centers[city]} className={
-                    (highlightCity && i === highlightIndex) ? 'text-blue-500' :
+                    (highlightCity && i === highlightIndex) ? 'text-blue-300' :
                     cityColor}/>
         })}
 

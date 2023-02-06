@@ -1,13 +1,14 @@
 import {useEffect, useState} from "react";
 import _ from "lodash";
 import divisions from "./divisions.json";
+import themap from './img/themap.svg';
 
 export const useSvg = () => {
     const [svgString, setSvgString] = useState('');
     const [data, setData] = useState({});
 
     useEffect(() => {
-        fetch(window.location.href+'themap.svg').then(r => r.text()).then(text => {setSvgString(text)});
+        fetch(themap).then(r => r.text()).then(text => {setSvgString(text)});
     }, []);
 
     useEffect(() => {
@@ -44,6 +45,7 @@ export const useSvg = () => {
             .map(res => ({city:res[1], svg:res[0]}))
             .filter(text => !text.svg.includes('#D6D5D5'))
             .map(text => ({...text, svg: text.svg.replace('#343434', 'currentColor')}))
+        console.log({texts});
 
         setData({svgString, opening, paths, centers, texts, closing});
     }, [svgString]);
