@@ -7,7 +7,7 @@ export const useSvg = () => {
     const [data, setData] = useState({});
 
     useEffect(() => {
-        fetch(window.location.href+'/themap.svg').then(r => r.text()).then(text => {setSvgString(text)});
+        fetch(window.location.href+'themap.svg').then(r => r.text()).then(text => {setSvgString(text)});
     }, []);
 
     useEffect(() => {
