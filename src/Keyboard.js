@@ -16,26 +16,27 @@ const Key = ({letter, onPress, disabled, md}) => {
 
 const Keyboard = ({tutorial, cities, width, height, currentCity, onCorrectAnswer, onWrongAnswer, onNext, onToggleZoom, md}) => {
     const [entered, setEntered] = useState('');
-    const [answer, setAnswer] = useState('');
     const [possibleCharacters, setPossibleCharacters] = useState([]);
     const [disabled, setDisabled] = useState(false);
 
+    const answer = currentCity.replace(' ','').toUpperCase()
     const allAnswers = cities.map(name => name.replace(' ', ''));
 
     // handle currentCity property change
     useEffect(() => {
         _setEntered('');
-        setAnswer(currentCity.replace(' ',''));
         setDisabled(false);
     }, [currentCity]);
 
     function _setEntered(newEntered) {
-        if (!answer.toUpperCase().startsWith(newEntered)) {
-            onWrongAnswer();
-            setDisabled(true);
-        } else if (newEntered === answer.toUpperCase() || allAnswers.filter(d => d.toUpperCase().startsWith(newEntered)).length === 1) {
-            onCorrectAnswer();
-            setDisabled(true);
+        if (answer) {
+            if (!answer.startsWith(newEntered)) {
+                onWrongAnswer();
+                setDisabled(true);
+            } else if (newEntered === answer || allAnswers.filter(d => d.toUpperCase().startsWith(newEntered)).length === 1) {
+                onCorrectAnswer();
+                setDisabled(true);
+            }
         }
 
         setEntered(newEntered);
@@ -85,7 +86,7 @@ const Keyboard = ({tutorial, cities, width, height, currentCity, onCorrectAnswer
     return(
         <div style={{width,height}} className={md ? "ml-4" : "ml-0"}>
                 <p className="text-2xl my-4 text-color-black">
-                    {entered || (tutorial ? 'Type the name of the highlighted city' : '_ _ _ _ _ _ _ _ _ _ _ _ _')}
+                    {entered || (tutorial ? 'Type the name of the blue city' : '_ _ _ _ _ _ _ _ _ _ _ _ _')}
                 </p>
             <div>
                 {keys.map((row,i) =>

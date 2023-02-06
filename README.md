@@ -1,7 +1,6 @@
 
 ## TODO
 
-* host on evincer
 * white city text when finished
 
 ## backlog 

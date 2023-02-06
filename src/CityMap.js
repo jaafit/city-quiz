@@ -36,7 +36,7 @@ const CityMap = ({city, highlightCity, showThisCity, showOtherCities, excludedCi
 
     if (!paths || !texts) return <p className="m-20">Loading map...</p>; // svg hasn't loaded yet
 
-    const includedTexts = texts.filter(text => !excludedCities.includes(text.name))
+    const includedTexts = texts.filter(text => !excludedCities.includes(text.city))
 
     const center = centers[highlightIndex];
     const zw = 400;
@@ -45,7 +45,7 @@ const CityMap = ({city, highlightCity, showThisCity, showOtherCities, excludedCi
             "100 600 1400 2600";
 
     const shownTexts = showThisCity ? includedTexts :
-            showOtherCities ? includedTexts.filter(text => !city || text.name !== divisions[highlightIndex])
+            showOtherCities ? includedTexts.filter(text => !city || text.city !== divisions[highlightIndex])
                 : [];
 
     return <div className='relative' style={{width, height, flexShrink:0}} >
@@ -60,7 +60,10 @@ const CityMap = ({city, highlightCity, showThisCity, showOtherCities, excludedCi
         })}
 
         {shownTexts
-            .map((text,i) => <SvgContainer html={text.svg} viewBox={viewBox} key={i}/>)}
+            .map((text,i) => {
+                const rights = answerHistory[text.city]?.filter(a=>a)?.length;
+                return <SvgContainer className={rights === 7 ? "text-white" : "text-gray-700"} html={text.svg} viewBox={viewBox} key={i}/>
+            })}
 
         <button className="absolute left-2 bottom-2 rounded p-3 bg-blue-200" >
             <a href={shareUrl} download="nhcities.svg" id="download-link">
