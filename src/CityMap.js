@@ -47,7 +47,6 @@ const CityMap = ({city, highlightCity, showThisCity, showOtherCities, excludedCi
     const shownTexts = showThisCity ? includedTexts :
             showOtherCities ? includedTexts.filter(text => !city || text.city !== divisions[highlightIndex])
                 : [];
-    console.log({includedTexts, shownTexts});
 
     return <div className='relative' style={{width, height, flexShrink:0}} >
         {paths.map((path, i) =>{

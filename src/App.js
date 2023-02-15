@@ -27,11 +27,17 @@ function App() {
     const [history, setHistory] = useLocalStorageState('history', {defaultValue:{}});
     const [zoom, setZoom] = useState(true);
     const [showPercent, setShowPercent] = useState(false);
+    const [sm, setSm] = useState(
+        window.matchMedia("(min-width: 576px)").matches
+    );
     const [md, setMd] = useState(
         window.matchMedia("(min-width: 768px)").matches
     );
 
     useEffect(() => {
+        window
+            .matchMedia("(min-width: 576px)")
+            .addEventListener('change', e => setSm(e.matches));
         window
             .matchMedia("(min-width: 768px)")
             .addEventListener('change', e => setMd( e.matches ));
@@ -102,7 +108,7 @@ function App() {
             />
 
             <div className={classnames("flex flex-col justify-between items-center", md ? 'w-1/2 h-full' : 'w-full h-1/2')} >
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center w-full">
                     {md && (
                         <header className="bg-blue-200 text-2xl p-6 w-full">
                             NH City Quiz
@@ -112,6 +118,7 @@ function App() {
 
                     <Keyboard
                         tutorial={progress < 0.01}
+                        sm={sm}
                         md={md}
                         cities={cityQueue}
                         currentCity={city}
@@ -138,8 +145,6 @@ function App() {
                             <p className="m-2 text-lg font-bold">{Math.floor(progress*100)}%</p>
                         }
                     </div>
-
-                    <a href="https://evincer.org" className="m-1 text-bold text-blue-700 cursor-pointer">evincer.org</a>
 
                 </div>
 

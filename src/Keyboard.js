@@ -2,25 +2,29 @@ import {useEffect, useState} from "react";
 import _ from "lodash";
 import classnames from "classnames";
 
-const Key = ({letter, onPress, disabled, md}) => {
+const Key = ({children, onPress, disabled, width, md, sm}) => {
 
     return <button className={classnames(
-            "border-gray-300 rounded m-1 text-xl text-color-blue",
-            md ? 'p-3' : 'p-2',
+            "border-gray-300 rounded text-color-blue p-2",
+            md ? 'text-xl' : sm ? 'text-base' : 'text-sm',
             disabled ? "bg-gray-100" : "bg-blue-200")}
+                   style={{width}}
         onClick={disabled ? undefined : onPress}>
-        {letter}
+        {children}
     </button>
 
 }
 
-const Keyboard = ({tutorial, cities, width, height, currentCity, onCorrectAnswer, onWrongAnswer, onNext, onToggleZoom, md}) => {
+const bs = '⇦';
+
+const Keyboard = ({tutorial, cities, width, height, currentCity, onCorrectAnswer, onWrongAnswer, onNext, onToggleZoom, sm, md}) => {
     const [entered, setEntered] = useState('');
     const [possibleCharacters, setPossibleCharacters] = useState([]);
     const [disabled, setDisabled] = useState(false);
+    const [confirming, setConfirming] = useState(false);
 
     const answer = currentCity.replace(' ','').toUpperCase()
-    const allAnswers = cities.map(name => name.replace(' ', ''));
+    const allAnswers = cities.map(name => name.toUpperCase().replace(' ', ''));
 
     // handle currentCity property change
     useEffect(() => {
@@ -28,25 +32,33 @@ const Keyboard = ({tutorial, cities, width, height, currentCity, onCorrectAnswer
         setDisabled(false);
     }, [currentCity]);
 
-    function _setEntered(newEntered) {
-        if (answer) {
-            if (!answer.startsWith(newEntered)) {
-                onWrongAnswer();
-                setDisabled(true);
-            } else if (newEntered === answer || allAnswers.filter(d => d.toUpperCase().startsWith(newEntered)).length === 1) {
-                onCorrectAnswer();
-                setDisabled(true);
-            }
+    function onConfirmAnswer() {
+        if (!answer.startsWith(entered)) {
+            onWrongAnswer();
+        } else if (entered === answer || allAnswers.filter(d => d.startsWith(entered)).length === 1) {
+            onCorrectAnswer();
         }
+        setDisabled(true);
+        setConfirming(false);
+    }
+
+    function _setEntered(newEntered) {
+        const possibleCities = allAnswers.filter(d => d.startsWith(newEntered));
+        if (possibleCities.length === 1)
+            setConfirming(possibleCities[0]);
+        else if (allAnswers.includes(newEntered))
+            setConfirming(newEntered);
+        else
+            setConfirming(false);
 
         setEntered(newEntered);
         // update possible characters
         const pc = _.uniq(
             allAnswers
-                .map(name => name.toUpperCase())
                 .filter(name => name.startsWith(newEntered))
                 .filter(name => name.length > newEntered.length)
-                .map(name => name[newEntered.length] === ' ' ? name[newEntered.length+1] : name[newEntered.length]))
+                .map(name => name[newEntered.length] === ' ' ? name[newEntered.length+1] : name[newEntered.length]));
+        if (newEntered.length) pc.push(bs);
         setPossibleCharacters(pc);
     }
 
@@ -61,9 +73,19 @@ const Keyboard = ({tutorial, cities, width, height, currentCity, onCorrectAnswer
             if (e.key === '=' || e.key === '+')
                 onToggleZoom();
 
+            if (e.key === 'Backspace' && !disabled)
+                _setEntered(entered.slice(0, -1));
+
+            if (e.key === ' ')
+                e.preventDefault();
+
             if ( e.key === 'Enter') {
+                e.preventDefault();
                 //_setEntered('');
-                onNext()
+                if (confirming)
+                    onConfirmAnswer();
+                else
+                    onNext();
             }
         }
         document.addEventListener('keydown', onKey, false);
@@ -72,36 +94,41 @@ const Keyboard = ({tutorial, cities, width, height, currentCity, onCorrectAnswer
 
     // user added a letter to their guess
     function onAddLetterFn(letter) {
-        return () => {
-            const  _entered = entered + letter;
-            _setEntered(_entered);
-
-        }
+        if (letter === bs)
+            return () => _setEntered(entered.slice(0, -1));
+        else
+            return () => _setEntered(entered + letter);
     }
 
     const keys = [['Q', 'W','E','R','T','Y','U','I','O','P'],
-        ['A','S','D','F','G','H','J','K','L',"'"],
-        ['Z','X','C','V','B','N','M']];
+        ['A','S','D','F','G','H','J','K','L'],
+        ['Z','X','C','V','B','N','M', bs]];
+
+    if (allAnswers.some(a => ~a.indexOf("'")))
+        keys[1].push("'");
 
     return(
-        <div style={{width,height}} className={md ? "ml-4" : "ml-0"}>
+        <div style={{width,height}} className={classnames('w-full', md ? "mx-4" : "mx-2")}>
                 <p className="text-2xl my-4 text-color-black">
                     {entered || (tutorial ? 'Type the name of the blue city' : '_ _ _ _ _ _ _ _ _ _ _ _ _')}
                 </p>
             <div>
                 {keys.map((row,i) =>
-                    <div key={i} className={classnames("flex flex-row pl-2", {'pl-3': i===1}, {'pl-7': i===2})}>
+                    <div key={i} className={classnames("flex max-w-full flex-row w-full mt-2 justify-around", {'px-3': i===1}, {'px-5': i===2})}>
                         {row.map((letter) =>
                             <Key letter={letter}
-                                 key={letter}
+                                 sm={sm}
                                  md={md}
+                                 width={Math.floor(100/row.length-1)+'%'}
                                  onPress={onAddLetterFn(letter)}
-                                 disabled={disabled || !possibleCharacters.includes(letter)}/>
+                                 disabled={disabled || !possibleCharacters.includes(letter)}>
+                                {letter}
+                            </Key>
                         )}
                     </div>
                 )}
-
             </div>
+            {confirming && <div className="w-full mt-3 flex justify-center"><Key onPress={onConfirmAnswer}>{confirming+'?'}</Key></div>}
 
 
 

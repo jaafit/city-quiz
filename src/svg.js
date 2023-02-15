@@ -40,14 +40,13 @@ export const useSvg = () => {
             };
         })
 
-        const matches = [...svgString.matchAll(/<g[^<]*<text><tspan[^>]*>([^<]*)<\/tspan><\/text>[^<]*<\/g>/sg)];
+        const matches = [...svgString.matchAll(/<g[^<]*<g[^<]*<text>([^<]*)<\/text>[^<]*<\/g>[^<]*<\/g>/sg)];
         const objs = matches
             .map(res => ({city:res[1], svg:res[0]}));
         const filtered = objs
             .filter(text => !text.svg.includes('#D6D5D5'));
         const texts = filtered
             .map(text => ({...text, svg: text.svg.replace('#343434', 'currentColor')}));
-        console.log({matches, objs, filtered, texts});
 
         setData({svgString, opening, paths, centers, texts, closing});
     }, [svgString]);

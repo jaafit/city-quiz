@@ -1,8 +1,6 @@
 
 ## TODO
 
-* white city text when finished
-
 ## backlog 
 * export/import
 * checkbox to add non-cities (after 50% complete)
